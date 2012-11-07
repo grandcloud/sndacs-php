@@ -17,8 +17,6 @@ require_once dirname(__FILE__).'/global.php';
  *
  * 如果创建成功则返回true，否则抛出异常
  * 可以通过异常对象的getCode()方法和getMessage()方法获取对应的错误码和错误信息
- *
- * 注意：当policy设置为private时，white list 和 black list值被忽略！！！
  */
  
 // 实例化GrandCloudStorage对象
@@ -26,9 +24,10 @@ $storage = new GrandCloudStorage(GRAND_CLOUD_HOST_DEFAULT);
 // 设定access_key 和 access_secret
 $storage->set_key_secret(ACCESS_KEY, ACCESS_SECRET); 
 
-function put_bucket_policy_test($bucket_name) {
+function put_bucket_policy_test($host,$bucket_name) {
 	global $storage;	
 	try {
+        $storage->set_host($host);
 	    $bucket_resouce = "{$bucket_name}/*";
 	    $bucket_policy = array(
 	        array(  // 允许匿名用户访问 $bucket_name
@@ -43,14 +42,15 @@ function put_bucket_policy_test($bucket_name) {
 	    );
 	
 	    $storage->put_bucket_policy($bucket_name, $bucket_policy);
-	
+	    
 	    success("Put bucket({$bucket_name}) policy success!");
 	
 	} catch (Exception $e) {
+        printf($storage->get_response_code());
 	    exception("Put bucket({$bucket_name}) policy failed!", $e);
 	}
 }
 
 foreach($CONFIG_TEST as $region=>$config) {
-	put_bucket_policy_test($config['bucket']);
+	put_bucket_policy_test($config['host'],$config['bucket']);
 }
