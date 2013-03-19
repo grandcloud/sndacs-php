@@ -161,8 +161,8 @@ class GCUploadPart extends  GCObject {
     
     public function to_xml_for_completemultipartupload() {
     	
-    	$xml = "<{$this::$partnumberTag}>{$this->partnumber}</{$this::$partnumberTag}>";
-        $xml .= "<{$this::$etagTag}>{$this->etag}</{$this::$etagTag}>";
+    	$xml = "<PartNumber>{$this->partnumber}</PartNumber>";
+        $xml .= "<ETag>{$this->etag}</ETag>";
        
         return $xml;
     }
@@ -444,7 +444,7 @@ class GCPartsEntity {
 	}
 	
 	public function get_bucket() {
-		return $this->$bucket;
+		return $this->bucket;
 	}
 	
 	public function set_key ($key) {
@@ -502,7 +502,7 @@ class GCPartsEntity {
 	}
 	
 	public function get_part($idx = null) {
-		if (null === $prefix) {
+		if (null === $idx) {
 		   return $this->partsarray;
 		}
 		$max = count($this->partsarray);
@@ -540,9 +540,9 @@ class GCPartsEntity {
 		$parts_xml = '<?xml version="1.0" encoding="UTF-8"?>';
 		$parts_xml .= "<CompleteMultipartUpload>";
 		foreach($this->partsarray as $part) {
-			$parts_xml .= "<{$this::$partTag}>";
+			$parts_xml .= "<Part>";
 			$parts_xml .= $part->to_xml_for_completemultipartupload();
-			$parts_xml .= "</{$this::$partTag}>";
+			$parts_xml .= "</Part>";
 		}
 		$parts_xml .= "</CompleteMultipartUpload>";
 		return $parts_xml;
@@ -1188,7 +1188,7 @@ class GrandCloudStorage {
 	 * @return true on success
 	 * @exception see GCError
 	 */
-	public function put_bucket($name, $local='') {
+	public function put_bucket($name, $local='huabei-1') {
 		$local_xml = $this->make_bucket_local($local);
 		$this->set_header('Content-Length', strlen($local_xml));
 		$this->set_body($local_xml);
@@ -1968,8 +1968,9 @@ class GrandCloudStorage {
 		// adjust marker when no delimiter
 		if ($marker === null && $entity->get_istruncated()) {
 			$last_object = $entity->get_object(-1);
-
-			$entity->set_marker($last_object->get_key());
+            if(empty($last_object) === false) {
+			   $entity->set_marker($last_object->get_key());
+            }
 		}
 
 		return $entity;
@@ -2477,16 +2478,14 @@ class GrandCloudStorage {
 
 		//若用户选择huadong-1，则默认不传location body
 		$local_xml = '';
+		$local = trim($local);
 		switch ($local) {
-			case 'huabei-1':
-				$local_xml = sprintf($template, $local);
-				break;
-
 			case 'huadong-1':
+			    break;    
 			default:
+			    $local_xml = sprintf($template,$local);
 				break;
 		}
-
 		return $local_xml;
 	}
 
