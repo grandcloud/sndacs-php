@@ -1458,10 +1458,10 @@ class GrandCloudStorage {
      * return new object info on success
      * @exception see GCError
      */
-    public function copy_object($sbucket,$skey,$dbucket,$dkey,$content_meta="") {
+    public function copy_object($sbucket,$skey,$dbucket,$dkey,$content_meta="",$content_type="") {
     	$path = "/{$dbucket}/{$dkey}";
     	$copy_source = "/{$sbucket}/{$skey}";
-    	return $this->copy_from_path_to_path($copy_source,$path,$content_meta);
+    	return $this->copy_from_path_to_path($copy_source,$path,$content_meta,$content_type);
     }
     
     /**
@@ -1473,13 +1473,13 @@ class GrandCloudStorage {
      * return request info on success
      * @exception see GCError
      */
-    public function copy_from_path_to_path($from_path,$to_path,$content_meta="") {
+    public function copy_from_path_to_path($from_path,$to_path,$content_meta="",$content_type="") {
     	$content_meta = trim($content_meta);
     	if(!empty($content_meta)) {
     		$content_meta .= ",";
     	}
     	$content_meta .= "x-snda-copy-source:{$from_path}";
-    	$conn = $this->make_request_with_path_and_params_split("PUT",$to_path,array(),$content_meta);
+    	$conn = $this->make_request_with_path_and_params_split("PUT",$to_path,array(),$content_meta,$content_type);
     	$code = $this->exec_request($conn);
     	if($code != 200) {
     		throw Exception($this->response_body,$code);
